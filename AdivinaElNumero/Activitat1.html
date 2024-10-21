@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego</title>
+
+</head>
+<body id="body">
+
+    
+   <h1>Bienvenido al juego adivina el numero </h1>
+   <h2> Empezemos las partida </h2>
+    <h3>Adivina el numero del 1 al 50 </h3>
+   
+
+   <input type="number" id="numeroJugador">
+    <button onclick="AdivinarNumero()">clicame</button>
+    <button onclick="reiniciarJuego()">reiniciarJuego</button>
+
+   
+   <p id="acierto">Introduce el numero </p>
+   <p id="puntos"> puntos total : 0 </p>
+   <p id="numero"></p>
+   <p id="numeroIntentos"> numero de intentos 10</p>
+
+
+    <script>
+      
+        let intentos = 10;    
+        let puntos = 0;
+        const a = numeroRamdon();
+      
+        function AdivinarNumero(){
+          let variable = parseInt(document.getElementById("numeroJugador").value); // para no tener que actualizar la pagina cada vez que el usuario introduce un numero, 
+          //debo de introducirlo dentro de la funcion 
+      
+            if(a === variable){
+                document.getElementById("numero").innerHTML = "felicidades, has acertado el numero ";
+                document.getElementById("body").style.backgroundColor = "green";
+                document.getElementById("numeroJugador").disabled = false;
+            }
+            else if(a > variable){
+                intentos--;
+                document.getElementById("numero").innerHTML = " el numero es mas grande"  ;
+                document.getElementById("numeroIntentos").innerHTML = " te quedan " + intentos + " intento" ;   
+            }
+
+            else{
+                intentos--;
+                document.getElementById("numero").innerHTML = " el numero es mas pequeño" ;
+                document.getElementById("numeroIntentos").innerHTML = " te quedan " + intentos + " intento" ;
+            }
+
+            if(intentos <= 0){
+                document.getElementById("numero").innerHTML = "el numero secreto era " + a;
+                document.getElementById("body").style.backgroundColor = "red";  
+                document.getElementById("numeroJugador").disabled = true; // explicar      
+            }   
+        }
+
+
+        function reiniciarJuego(){
+            intentos = 10;
+            puntos = 0;
+            document.getElementById("numero").innerHTML = " ";
+            document.getElementById("numeroIntentos").innerHTML = "numeros de intentos " + intentos;
+            document.getElementById("body").style.backgroundColor = "white";
+            document.getElementById("numeroJugador").value = "";
+            document.getElementById("numeroJugador").disabled = false;
+    
+              // explicar
+        }
+
+        function numeroRamdon(){
+            let max = 1;
+            let min = 50;
+
+            return Math.floor(Math.random() * (max -min)) + min;
+
+        }
+
+       
+       
+    </script>
+
+</body>
+</html>
