@@ -1,16 +1,8 @@
 const formularioObj = document.getElementById("juego");
-
 let paraulaForm = "";
 let palabraSecreta = [];
 let palabraOculta = [];
-
-function myFunction() {
-    if (formularioObj.type === "password") {
-        formularioObj.type = "text";
-    } else {
-        formularioObj.type = "password";
-    }
-}
+let intentos = 5;
 
 function funcionBoton() {
     try {
@@ -34,10 +26,8 @@ function funcionBoton() {
         palabraSecreta = paraulaForm.toUpperCase().split("");
         palabraOculta = new Array(palabraSecreta.length).fill("_");
 
- 
         document.getElementById("Mostrar").innerHTML = palabraOculta.join(" ");
 
-     
         document.getElementById("juego").disabled = true;
         document.getElementById("boton").disabled = true;
 
@@ -46,11 +36,12 @@ function funcionBoton() {
     }
 }
 
-function adivinar(obj) {
-    const caracter = obj.textContent.toUpperCase();
+
+function adivinar(boton) {
+    const caracter = boton.textContent.toUpperCase();
     let encontrado = false;
 
-    // Verificamos si la letra está en la palabra secreta
+    // Verificar si la letra está en la palabra secreta
     palabraSecreta.forEach((letra, index) => {
         if (letra === caracter) {
             palabraOculta[index] = letra;
@@ -58,20 +49,34 @@ function adivinar(obj) {
         }
     });
 
-    // Actualiza la palabra escrita que se ha ocultado
+    // Actualizar palabra oculta
     document.getElementById("Mostrar").innerHTML = palabraOculta.join(" ");
 
-    // hago el boton disabled
-    obj.disabled = true;
+    // Cambiar estado del botón
+    boton.className = "boton-letra desactivado";
+    boton.disabled = true;
 
+    // Manejo de aciertos y fallos
     if (encontrado) {
-        console.log("la letra " +caracter +" esta en la palabra");
+        console.log(`La letra ${caracter} está en la palabra`);
     } else {
-        console.log("la letra " + caracter + " no se encuentra en la palabra ");
+        intentos--;
+        console.log(`La letra ${caracter} no está en la palabra. Intentos restantes: ${intentos}`);
     }
 
-    // Verifica si se ha completado la palabra
+    // Verificar si se ganó o perdió
     if (!palabraOculta.includes("_")) {
         document.getElementById("body").style.backgroundColor = "green";
+        window.alert("¡Felicidades! Has ganado.");
+        deshabilitarBotones();
+    } else if (intentos <= 0) {
+        document.getElementById("body").style.backgroundColor = "red";
+        window.alert("¡Has perdido la partida!");
+        deshabilitarBotones();
     }
+}
+
+function deshabilitarBotones() {
+    const botones = document.querySelectorAll(".boton-letra");
+    botones.forEach((boton) => (boton.disabled = true));
 }
