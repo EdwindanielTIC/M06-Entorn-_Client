@@ -53,7 +53,7 @@ function adivinar(boton) {
     document.getElementById("Mostrar").innerHTML = palabraOculta.join(" ");
 
     // Cambiar estado del botón
-    boton.className = "boton-letra desactivado";
+    //boton.className = "boton-letra desactivado";
     boton.disabled = true;
 
     // Manejo de aciertos y fallos
@@ -61,6 +61,7 @@ function adivinar(boton) {
         console.log(`La letra ${caracter} está en la palabra`);
     } else {
         intentos--;
+        document.getElementById("puntos").textContent = "Puntos " + intentos;
         console.log(`La letra ${caracter} no está en la palabra. Intentos restantes: ${intentos}`);
     }
 
@@ -68,8 +69,10 @@ function adivinar(boton) {
     if (!palabraOculta.includes("_")) {
         document.getElementById("body").style.backgroundColor = "green";
         window.alert("¡Felicidades! Has ganado.");
+       
         deshabilitarBotones();
     } else if (intentos <= 0) {
+        intentos--;
         document.getElementById("body").style.backgroundColor = "red";
         window.alert("¡Has perdido la partida!");
         deshabilitarBotones();
