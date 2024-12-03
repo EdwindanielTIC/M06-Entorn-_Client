@@ -2,9 +2,12 @@ const formularioObj = document.getElementById("juego");
 let paraulaForm = "";
 let palabraSecreta = [];
 let palabraOculta = [];
-let intentos = 5;
+let intentos = 10;
 let cambiar = false;
 let contador = 0;
+let totalpartidas = 0;
+let totalPeridad = 0;
+let porcentajesPartidas = 0;
 
 function funcionBoton() {
     if (!cambiar) {
@@ -77,6 +80,7 @@ function adivinar(boton) {
             document.getElementById("puntos").textContent =
                 "HAS PERDIDO, NO TIENES MÁS VIDAS";
             document.getElementById("body").style.backgroundColor = "red";
+            totalPeridad++;
 
             deshabilitarBotones();
         }
@@ -85,11 +89,21 @@ function adivinar(boton) {
         );
     }
 
+
     if (!palabraOculta.includes("_")) {
         document.getElementById("body").style.backgroundColor = "green";
         window.alert("¡Felicidades! Has ganado.");
+        totalpartidas++;
+        porcentajesPartidas = (totalPeridad/totalpartidas)*100;
+        document.getElementById("total-partidas").textContent = "total partidas realizadas : "+totalpartidas;
+        document.getElementById("total-partidas").textContent = "total partidas realizadas : "+ porcentajesPartidas;
+        
         deshabilitarBotones();
     }
+
+//    porcentajesPartidas = (totalPeridad/totalpartidas)*100;
+
+//     document.getElementById("total-partidas").textContent = "total partidas realizadas : "+ porcentajesPartidas;
 }
 
 function deshabilitarBotones() {
