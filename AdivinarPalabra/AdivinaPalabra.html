@@ -10,7 +10,7 @@
 </head>
 <body id="body">
 
-    <input type="password" placeholder="Palabra Secreta" id="juego"> 
+    <input type="password" placeholder="Palabra Secreta" id="inputPalabra"> 
 
     <input type="checkbox" onclick="myFunction()">  
 
@@ -18,12 +18,17 @@
 
     <div id="mostrar"></div>
 
+   
+
 
     <H1>comenzar partida</H1>
 
     <p id="Mostrar"> muestro texto </p>
     <!--Con lo siguiente  lo que hago es hacer las lineas separadas por espacios osea, asi -> (_ _ _) -->
     
+<div id="ahorcado">
+    <img id="imagenAhorcado" src="./imagenes/img_1.jpg" alt="Ahorcado">
+</div>
 
     <h3>JUGADOR 1</h2> 
 
@@ -33,7 +38,9 @@
 
     <p id="pganadas">Partidas Ganadas</p>
 
-    <p>Partidas con mas puntos </p>
+    <p id="partidaConMasPuntos">Partidas con mas puntos </p>
+
+
    
 
     <div id="contenedor">
@@ -68,6 +75,7 @@
     
    
     <script src="AdivinaPalabra.js"> </script>
+    <script src="funcionAdivinar.js" ></script>
     
 </body>
 </html>
