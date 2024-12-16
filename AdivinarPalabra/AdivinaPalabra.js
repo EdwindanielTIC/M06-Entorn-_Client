@@ -19,8 +19,6 @@ let puntuacion = {
     "porcentajesPartidas" : 0,
     "partidasGanadas" : 0
 };
-
-
 function myFunction(){
     var x = document.getElementById("inputPalabra");
     if(x.type == "password"){
@@ -30,7 +28,6 @@ function myFunction(){
         x.type = "password";
     }
 }
-
 function funcionBoton() {
     if (!cambiar) {
         iniciarjuego();
@@ -38,7 +35,6 @@ function funcionBoton() {
         ReiniciarJuego();
     }
 }
-
 function iniciarjuego() {
     try {
         paraulaForm = formularioObj.value;
@@ -64,8 +60,6 @@ function iniciarjuego() {
         window.alert("Ha habido un error");
     }
 }
-
-
 function ReiniciarJuego() {
     // Restablecer variables
     palabraSecreta = [];
