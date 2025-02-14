@@ -1,0 +1,70 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e0d7b0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+#contenido {
+    display: flex; /*Diseño flexible*/
+    flex-wrap: wrap; /*Me ayuda a encajar la carta dependiendo del tamaño de la pantalla*/
+    justify-content: center;
+}
+
+.pokemon-card { /*etiqueta que modifica todo lo de adentro de la carta y los bordes*/
+    background-color: #fff;
+    border: 4px solid rgb(69, 69, 63); 
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(207, 61, 61, 0.1);
+    margin: 10px;
+    padding: 20px;
+    width: 200px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /*Tiempo que tarda una carta en levantarse*/
+}
+
+/*con el traslateY lo que me hara sera levantar la carta con el eje vertical*/
+.pokemon-card:hover {
+    transform: translateY(-15px); 
+    box-shadow: 0 8px 16px rgba(91, 106, 204, 0.2);
+}
+
+.pokemon-card img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;/*Me ayuda a encajar la imagenes, por si son muy grandes, pornelas de la misma medidas 
+    sin necesitad de hacer ningun recorde a la carta*/
+}
+
+.pokemon-card h2 {
+    margin: 0;
+    font-size: 1.5em; /*Tamano de los nombres de lo poquemons*/
+    color: #839cb0;
+}
+
+.pokemon-card p {
+    margin: 10px 0 0;
+    color: #666;
+}
+
+.pokemon-card button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 15px;
+    padding: 10px;
+    margin-top: 10px;
+    
+}
+
+.pokemon-card button:hover {
+    background-color: #95b3d6;
+  
+}

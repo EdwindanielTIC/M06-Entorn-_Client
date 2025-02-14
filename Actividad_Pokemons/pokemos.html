@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon API</title>
+    <link rel="stylesheet" href="pokemons.css">
+</head>
+<body>
+    <h1>Pokémons</h1>
+    <select id="deplegable" onchange="actualizarPokemons()">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="30">30</option>
+        <option value="40">40</option>
+      
+    </select>
+
+    <div id="contenido"></div> <!-- Aquí se insertarán los datos -->
+
+    <script src="pokemons.js"></script>
+</body>
+</html>
