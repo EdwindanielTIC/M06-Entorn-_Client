@@ -8,7 +8,6 @@ class Urgent extends Tasca{
     }
 
     mostrarInfoTaca(){
-
         
         return `${super.mostrarInfoTaca()}, Recordatorio: ${this.#recordatorio}`
 

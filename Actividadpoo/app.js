@@ -7,16 +7,27 @@ class app{
     afegirTasca(tasca){
         this.#tasques.push(tasca);
 
-        console.log(`Tasca añadida: ${tasca.mostrarInfoTaca()}`);
     }
 
-    completaTasca(){
+    completaTasca(id){
         
-        console.log(`La tasca am id: ${tasca.id}`);
+      let tasca = null;
+
+      for (let i =0; i<this.#tasques; i++){
+        if(this.#tasques[i].getId() == id ){
+            this.#tasques[i].completaTasca();
+            console.log(`Tasca ${id} completada`);
+            return;
+
+        }
+      }
+      console.log(`Tasca ${id} NO completada`)
     }
 
     elimnarTasca(){
-        console.log(`Elimar Tasca amb id: ${tasca.id}`);
+        
+        
+        
 
     }
     

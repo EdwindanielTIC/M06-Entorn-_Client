@@ -17,28 +17,28 @@ class Tasca{
 
     }
 
-    get getid() {
+    getId() {
 
         return this.#id;
 
     }
 
-    set setid(id){
+    setid(id){
         
         this.#id = id;
     }
 
-    get getnom(){
+    getnom(){
         return this.#nom;
     }
 
-    set setnom(nombre){
+    setnom(nombre){
         this.#nom = nombre;
     }
 
-   set completada(completa){ 
+   estacompletada(){ 
 
-        this.#completada = completa;
+        return this.#completada;
     }
 
     estaCompletada(){ //boolean
@@ -46,9 +46,7 @@ class Tasca{
         return this.#completada;
     }
 
-
-
-
+    
     mostrarInfoTaca(){ //Stirng
 
         return `nom ${this.#nom}, tipus: ${this.tipus}, prioritat: ${this.prioritat}, completa: ${this.#completada}`

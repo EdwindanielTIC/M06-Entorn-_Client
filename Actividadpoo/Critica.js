@@ -8,11 +8,11 @@ class Critica extends Tasca{
         this.#descripcio = descripcio;
     }
 
-    get dataLimit(){
+    getdataLimit(){
         return this.#dataLimit;
     }
 
-    set dataLimit(novaData){ // void
+    setdataLimit(novaData){ // void
 
         this.#dataLimit = novaData;
     }
