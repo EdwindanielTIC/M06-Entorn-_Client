@@ -1,4 +1,4 @@
-class Atraccio extends PuntInteres{
+class Atraccio extends PuntInteres {
 
     horaris;
     preu;
@@ -14,10 +14,10 @@ class Atraccio extends PuntInteres{
 
     getPreuIva(ivaPais){
 
-        if(this.preu > 0){
+        if(this.preu === 0){
             console.log("Entrada gratuïta");
-        }else if(ivaPais == 0){
-            console.log(this.preu)
+        }else if(ivaPais === 0){
+            console.log(`Precio sin iva :${this.preu} ${this.moneda}`);
         }else{
             let resultadoIva ;
 
@@ -30,3 +30,9 @@ class Atraccio extends PuntInteres{
 
 
 }
+
+//funciona
+
+// const atraccio1 = new Atraccio(123,"España","Barcelona","Alberto","calle murcia","12;23",10,"Euro")
+
+// console.log(atraccio1.getPreuIva(20));
