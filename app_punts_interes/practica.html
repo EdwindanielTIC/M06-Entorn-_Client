@@ -19,13 +19,43 @@
    
 </head>
 <body>
-    <h1> Probando atraccio </h1>
-
-    <div id="map"></div>
-
-
     
+    <div class="container">
+        <div class="contenido">
+            <div class="filtros">
+                <div>
+                    <label for="tipus">Tipus:</label>
+                    <select id="tipus">
+                        <option value="">Selecciona...</option>
+                        <option value="opcio1">Opció 1</option>
+                        <option value="opcio2">Opció 2</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="ordenacio">Ordenació:</label>
+                    <select id="ordenacio">
+                        <option value="asc">Ascendent</option>
+                        <option value="desc">Descendent</option>
+                    </select>
+                </div>
+            </div>
+            <input type="text" size="54px" placeholder="Filtrar per nom...">
+            <div class="results">No hi ha informació per mostrar</div>
+            <div id="numeroTotal">Numero total:</div> 
+            <button class="netejarButon">Netejar tot</button>
+            <div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+                <p>Arrastra y suelta archivo CSV</p>
+            </div>
+        </div>
+        <div id="map"></div> <!-- Mapa a la derecha -->
+    </div>
+ 
+  
+
     <script src="Mapa.js"></script>
+   
+     <script src="../fichero.js"></script>
    
 </body>
 </html>
+ <!-- fuente : https://developer.mozilla.org/es/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop -->
