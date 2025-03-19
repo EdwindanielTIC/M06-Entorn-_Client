@@ -1,33 +1,58 @@
 function dropHandler(ev) {
     console.log("Fichero(s) arrastrados");
-    const imatge = document.createElement("img");
-    imatge.src = "https://th.bing.com/th/id/OIP.1wUtwRMDnPYheibmx8t4owAAAA?rs=1&pid=ImgDetMain";
     // Evitar el comportamiendo por defecto (Evitar que el fichero se abra/ejecute)
     ev.preventDefault();
+
+    const contenedor = document.querySelector(".container"); // NO DEBO USAR EL DOCUMENTGETELEMETNBYCLASS, YA QUE SI NO ME ES MAS LENTO
+    if(!contenedor){
+      console.error("no se encontro el contenedor")
+      return;
+    }
+
+
   
     if (ev.dataTransfer.items) {
       // Usar la interfaz DataTransferItemList para acceder a el/los archivos)
       for (var i = 0; i < ev.dataTransfer.items.length; i++) {
         // Si los elementos arrastrados no son ficheros, rechazarlos
         if (ev.dataTransfer.items[i].kind === "file") {
-          // var file = ev.dataTransfer.items[i].getAsFile();
-          // console.log("... fichero[" + i + "].nombre = " + file.name);
-          const contenedor = document.getElementById("container");
+         
+          const file = ev.dataTransfer.items[i].getAsFile();
+          const nombrearchivo= file.name;
+          const archivoExtencion = nombrearchivo.split(".").pop().toLowerCase();
           
-          contenedor.appendChild(imatge);
+          if(archivoExtencion !== "csv"){
+
+            muestroImagen(contenedor);
+
+          }else{
+            console.log("Archivo CSV aceptado" , nombrearchivo);
+          }
+
+         
         }
       }
     } else {
       // Usar la interfaz DataTransfer para acceder a los archivos
       for (var i = 0; i < ev.dataTransfer.files.length; i++) {
-        console.log(
-          "... fichero[" + i + "].nombre = " + ev.dataTransfer.files[i].name,
-        );
+       
+        const file = ev.dataTransfer.files[i];
+        const nombreDOcs = file.name;
+        const  extencionArchivo = nombreDOcs.split(".").pop().toLowerCase();
+
+        if(extencionArchivo !== "cvs"){
+          mostrarImagenDeAdvertencia(contenedor);
+          
+        }else{
+          console.log("Es un archivo csv: ", nombreDOcs)
+        }
+
+
       }
     }
   
     // Pasar el evento a removeDragData para limpiar
-    // removeDragData(ev);
+    removeDragData(ev);
   }
   
 
@@ -49,4 +74,24 @@ function dragOverHandler(ev) {
       // Use DataTransfer interface to remove the drag data
       ev.dataTransfer.clearData();
     }
+  }
+
+ function muestroImagen(contenedor){
+
+    const imatge = document.createElement("img");
+
+    imatge.src = "https://files.oaiusercontent.com/file-9xrs9yp8Mo2R54JMKTUEup?se=2025-03-19T19%3A51%3A32Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D39aa5666-55a3-4805-81aa-71ff92900400.webp&sig=UCQ%2BRl4dGw3ACXucBznHCqyxZIAYdhCbUWBvgnpaLfE%3D"
+    imatge.style.width = "700px";
+    imatge.style.margin = "700px";
+    contenedor.style.display = "none"; // lo que me hara sera que se me bloqueara el contenedor y se me mostrara la imagen
+
+    const fotoContenedor = document.getElementById("foto");
+      if(fotoContenedor){ // verificamos que exista
+
+        fotoContenedor.style.display = "block";
+
+        fotoContenedor.appendChild(imatge);
+
+      }
+
   }
