@@ -21,34 +21,18 @@ function dropHandler(ev) {
           const nombrearchivo= file.name;
           const archivoExtencion = nombrearchivo.split(".").pop().toLowerCase();
           
-          if(archivoExtencion !== "csv"){
+          if(archivoExtencion !== "csv"){  
 
             muestroImagen(contenedor);
 
           }else{
-            console.log("Archivo CSV aceptado" , nombrearchivo);
+            console.log("-----Archivo CSV aceptado-----" , nombrearchivo);
+
+            //intrudir el codigo para leer la informacion
           }
-
-         
         }
       }
-    } else {
-      // Usar la interfaz DataTransfer para acceder a los archivos
-      for (var i = 0; i < ev.dataTransfer.files.length; i++) {
-       
-        const file = ev.dataTransfer.files[i];
-        const nombreDOcs = file.name;
-        const  extencionArchivo = nombreDOcs.split(".").pop().toLowerCase();
-
-        if(extencionArchivo !== "cvs"){
-          mostrarImagenDeAdvertencia(contenedor);
-          
-        }else{
-          console.log("Es un archivo csv: ", nombreDOcs)
-        }
-
-
-      }
+      
     }
   
     // Pasar el evento a removeDragData para limpiar
