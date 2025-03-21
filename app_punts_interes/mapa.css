@@ -87,3 +87,8 @@ body {
     height: 50x;
     color: green;
 }
+
+#file-input{ 
+    /* para que no me aparezca el boton, lo he ocultado con display none */
+    display: none;
+}

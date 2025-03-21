@@ -41,11 +41,19 @@
             </div>
             <input type="text" size="54px" placeholder="Filtrar per nom...">
             <div class="results">No hi ha informació per mostrar</div>
+          
             <div id="numeroTotal">Numero total:</div> 
             <button class="netejarButon">Netejar tot</button>
+
             <div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
                 <p>Arrastra y suelta archivo CSV</p>
+
+                <input type="file" id="file-input" />
+                <div id="message"></div>
+                <pre id="file-content"></pre>
+                
             </div>
+     
         </div>
         <div id="map"></div> <!-- Mapa a la derecha -->
     </div>
