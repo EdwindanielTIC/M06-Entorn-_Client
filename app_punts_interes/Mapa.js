@@ -95,8 +95,6 @@ class Mapa{
 }
 
 
-const mapa1 = new Mapa();
-
 
 
 

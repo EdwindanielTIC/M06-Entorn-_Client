@@ -30,9 +30,3 @@ class Atraccio extends PuntInteres {
 
 
 }
-
-//funciona
-
-// const atraccio1 = new Atraccio(123,"España","Barcelona","Alberto","calle murcia","12;23",10,"Euro")
-
-// console.log(atraccio1.getPreuIva(20));
