@@ -3,8 +3,6 @@ let tipusSet = new Set(); // Set para almacenar tipos únicos
 let mapa;
 
 
-
-
 document.addEventListener('DOMContentLoaded', () => {
 
     mapa = new Mapa(); 
@@ -17,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("file-input").addEventListener("change", handleFileSelection);
   });
 
-
+//arrastramos el archivio para que se lea
 function dropHandler(ev) {
   console.log("Fichero(s) arrastrados");
   ev.preventDefault();
@@ -48,7 +46,13 @@ function dropHandler(ev) {
   removeDragData(ev);
 }
 
+
+// con la siguiente funcion, voy a subir un archivo csv, me lo va a procesar y me dara info del lugar
+
+
 function handleFileSelection(event) {
+
+  
     const fileContentDisplay = document.getElementById("file-content");
     const messageDisplay = document.getElementById("message");
 
@@ -56,99 +60,74 @@ function handleFileSelection(event) {
     fileContentDisplay.textContent = "";
     messageDisplay.textContent = "";
 
-    if (!file.name.toLowerCase().endsWith(".csv")) {
+    if (!file.name.toLowerCase().endsWith(".csv")) { 
         showMessage("Archivo no soportado. Seleccione un archivo CSV.", "error");
         return;
     }
 
+    //siguiente codigo me va a leer el archivo con filereader, me extraera su contenido, divide el cont el linea y lo procesa
+
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
         const contenido = reader.result;
         fileContentDisplay.textContent = contenido;
 
         const lineas = contenido.split("\n").map(line => line.trim());
         llistaObjectes = [];
-        tipusSet.clear(); 
+        tipusSet.clear();
 
-       
         for (let i = 1; i < lineas.length; i++) {
             if (lineas[i] === "") continue;
 
             const columnas = lineas[i].split(",");
             const tipus = columnas[0]?.trim();
-            
-         
             if (tipus) tipusSet.add(tipus);
 
-         
             let objecto = null;
-            
+            const id = columnas[1]?.trim() || Date.now().toString();
+            const pais = columnas[2]?.trim() || "";
+            const ciutat = columnas[3]?.trim() || "";
+            const nom = columnas[4]?.trim() || "";
+            const direccio = columnas[5]?.trim() || "";
+            let latitud = columnas[6] ? parseFloat(columnas[6].trim()) : null;
+            let longitud = columnas[7] ? parseFloat(columnas[7].trim()) : null;
+
             if (tipus === "Espai") {
-                // definimos los punots segun mi estrucutra que tengo 
-                const id = columnas[1]?.trim() || Date.now().toString();
-                const pais = columnas[2]?.trim() || "";
-                const ciutat = columnas[3]?.trim() || "";
-                const nom = columnas[4]?.trim() || "";
-                const direccio = columnas[5]?.trim() || "";
-                
                 objecto = new PuntInteres(id, pais, ciutat, nom, direccio);
                 objecto.tipus = "Espai";
-                
-                // He creado una variable puntuacio para poder hacer la puntuacion de los puntos de interes
-                if (columnas[6] && columnas[7]) {
-                    objecto.latitud = parseFloat(columnas[6].trim());
-                    objecto.longitud = parseFloat(columnas[7].trim());
-                }
-            } 
-            else if (tipus === "Atraccio") {
-                // Para Atraccio esto es del construcotr: id, pais, ciutat, nom, direccio, horari, preu, moneda
-                const id = columnas[1]?.trim() || Date.now().toString();
-                const pais = columnas[2]?.trim() || "";
-                const ciutat = columnas[3]?.trim() || "";
-                const nom = columnas[4]?.trim() || "";
-                const direccio = columnas[5]?.trim() || "";
+            } else if (tipus === "Atraccio") {
                 const horari = columnas[6]?.trim() || "";
                 const preu = parseFloat(columnas[7]?.trim() || "0");
                 const moneda = columnas[8]?.trim() || "EUR";
-                
                 objecto = new Atraccio(id, pais, ciutat, nom, direccio, horari, preu, moneda);
                 objecto.tipus = "Atraccio";
-                
-           
-                if (columnas[9] && columnas[10]) {
-                    objecto.latitud = parseFloat(columnas[9].trim());
-                    objecto.longitud = parseFloat(columnas[10].trim());
-                }
-            } 
-            else if (tipus === "Museu") {
-                // Para Museu : id, pais, ciutat, nom, direccio, horaris, preu, moneda
-                const id = columnas[1]?.trim() || Date.now().toString();
-                const pais = columnas[2]?.trim() || "";
-                const ciutat = columnas[3]?.trim() || "";
-                const nom = columnas[4]?.trim() || "";
-                const direccio = columnas[5]?.trim() || "";
+                latitud = columnas[9] ? parseFloat(columnas[9].trim()) : null;
+                longitud = columnas[10] ? parseFloat(columnas[10].trim()) : null;
+            } else if (tipus === "Museu") {
                 const horaris = columnas[6]?.trim() || "";
                 const preu = parseFloat(columnas[7]?.trim() || "0");
                 const moneda = columnas[8]?.trim() || "EUR";
-                
                 objecto = new Museu(id, pais, ciutat, nom, direccio, horaris, preu, moneda);
                 objecto.tipus = "Museu";
-                
-          
-                if (columnas[9] && columnas[10]) {
-                    objecto.latitud = parseFloat(columnas[9].trim());
-                    objecto.longitud = parseFloat(columnas[10].trim());
-                }
+                latitud = columnas[9] ? parseFloat(columnas[9].trim()) : null;
+                longitud = columnas[10] ? parseFloat(columnas[10].trim()) : null;
             }
 
-            if (objecto) llistaObjectes.push(objecto);
+            if (objecto) {
+                llistaObjectes.push(objecto);
+                
+                if (!latitud || !longitud) { 
+                    // console.log(`Coordenadas faltantes para ${objecto.nom} (${objecto.tipus})`);    
+                    await obtenerDatosPais(pais, objecto);
+                }
+            }
         }
 
         console.log("Llista d'objectes creada:", llistaObjectes);
         console.log("Tipus disponibles:", tipusSet);
-        
-        updateDropdown(); //Actualizamos el menu desplegable
-        aplicarFiltros(); // Mostrar resultados tras cargar el archivo
+
+        updateDropdown();
+        aplicarFiltros();
     };
 
     reader.onerror = () => {
@@ -158,6 +137,39 @@ function handleFileSelection(event) {
     reader.readAsText(file);
 }
 
+//hacemos una peticion a la api para obtener los datos del pais y asi obtenter la banderas
+
+async function obtenerDatosPais(code, objecto) {
+    try {
+        const response = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
+        const data = await response.json();
+
+        // console.log("Respuesta de la API:", data);
+
+        if (!data || data.status === 404) {
+            console.warn(`Código de país no encontrado: ${code}`);
+            return;
+        }
+
+        const country = data[0];
+        objecto.bandera = country.flags.svg;
+        objecto.latitud = country.latlng[0];
+        objecto.longitud = country.latlng[1];
+
+    } catch (error) {
+        console.error("Error al obtener datos del país:", error);
+    }
+}
+
+
+
+
+
+
+
+
+// Actualizar menu desplegabel
+
 function updateDropdown() {
     const select = document.getElementById("tipus");
     select.innerHTML = '<option value="">Tots</option>'; // Restablecer con opción inicial
@@ -166,9 +178,13 @@ function updateDropdown() {
         const option = document.createElement("option");
         option.value = value;
         option.textContent = value;
+     
+        
         select.appendChild(option);
     });
 }
+
+
 
 function showMessage(message, type) {
     const messageDisplay = document.getElementById("message");
@@ -190,13 +206,25 @@ function removeDragData(ev) {
     }
 }
 
-
+//funcion para mostrar imagen de csv no leido
 function muestroImagen(contenedor) {
+
+ 
   const fotoContenedor = document.getElementById("foto");
-  if (!fotoContenedor) {
-      console.log("No se ha encontrado ninguna foto");
-      return;
+if (!fotoContenedor) {
+    console.error("Elemento con ID 'foto' no encontrado");
+    return;
+}
+
+  if ( fotoContenedor && imatge instanceof Node) {
+    fotoContenedor.appendChild(imatge);
+    //   console.log("No se ha encontrado ninguna foto");
+    //   return;
   }
+  if (resultsDiv && lista instanceof Node) {
+    resultsDiv.appendChild(lista);
+}
+
 
   if (!fotoContenedor.querySelector("img")) {
       const imatge = document.createElement("img");
@@ -206,9 +234,14 @@ function muestroImagen(contenedor) {
 
       contenedor.style.display = "none"; // Ocultar contenedor y mostrar imagen  tmb lo puedo hacer en el css
       fotoContenedor.style.display = "block";
+   
       fotoContenedor.appendChild(imatge);
   }
 }
+
+
+
+
 
 
 // Funciones para la funcionalidad de filtrado y visualización
@@ -217,14 +250,15 @@ function aplicarFiltros() {
   const ordenacio = document.getElementById("ordenacio").value;
   const textFiltre = document.querySelector("input[type='text']").value.toLowerCase();
 
-  let resultats = llistaObjectes.filter(obj => {
+   let resultats = llistaObjectes;
+
+   resultats = resultats.filter(obj => {
       if (!obj) return false; 
 
      
       if (tipusSeleccionat && obj.tipus !== tipusSeleccionat) {
           return false;
       }
-
       
       if (textFiltre && !obj.nom.toLowerCase().includes(textFiltre)) {
           return false;
@@ -237,6 +271,7 @@ function aplicarFiltros() {
   resultats.sort((a, b) => {
       const nomA = a.nom.toLowerCase();
       const nomB = b.nom.toLowerCase();
+    //   console.log(`el total de lugares es : ${llistaObjectes.length}`)
 
       if (ordenacio === "asc") {
           return nomA.localeCompare(nomB);
@@ -249,79 +284,103 @@ function aplicarFiltros() {
   // Mostrar resultados
   mostrarResultats(resultats);
 
+
   // Actualizar contador
-  document.getElementById("numeroTotal").textContent = `Numero total: ${resultats.length}`;
+
+  if(!tipusSeleccionat && !textFiltre){
+    document.getElementById("numeroTotal").textContent = `Numero total: ${llistaObjectes.length}`;
+
+  }else{
+    document.getElementById("numeroTotal").textContent = `Numero total: ${resultats.length}`;
+
+  }
+
 }
+
+
+
+
 
 
 function mostrarResultats(resultats) {
-  const resultsDiv = document.querySelector(".results");
+    const resultsDiv = document.querySelector(".results");
 
-  if (resultats.length === 0) {
-      resultsDiv.textContent = "No hi ha informació per mostrar";
-      return;
-  }
+    if (resultats.length === 0) {
+        resultsDiv.textContent = "No hi ha informació per mostrar";
+        return;
+    }
 
-  resultsDiv.innerHTML = "";
+    resultsDiv.innerHTML = "";
 
-// Voy a crear una lista para mostra toods los resultadfos
-  const lista = document.createElement("ul");
-  lista.className = "lista-resultados";
+    const lista = document.createElement("ul");
+    lista.className = "lista-resultados";
 
-  
-  resultats.forEach(obj => {
-      if (!obj) return; 
+    resultats.forEach(obj => {
+        if (!obj || !obj.nom || !obj.ciutat || !obj.pais) return;
 
-      const item = document.createElement("li");
-      item.className = `item-${obj.tipus.toLowerCase()}`;
+        const item = document.createElement("li");
+        item.className = `item-${obj.tipus.toLowerCase()}`;
 
-      // Crear título con el nombre
-      const titulo = document.createElement("h3");
-      titulo.textContent = obj.nom;
-      item.appendChild(titulo);
+        const titulo = document.createElement("h3");
+        titulo.textContent = obj.nom;
+        item.appendChild(titulo);
 
+        // Contenedor para país, ciudad y bandera
+        const paisCiutatContainer = document.createElement("div");
+        paisCiutatContainer.style.display = "flex";
+        paisCiutatContainer.style.alignItems = "center";
+        paisCiutatContainer.style.gap = "10px";
 
-      const info = document.createElement("p");
-      info.textContent = `${obj.ciutat}, ${obj.pais}`;
-      item.appendChild(info);
+        const info = document.createElement("p");
+        info.textContent = `${obj.ciutat}, ${obj.pais}`;
+        paisCiutatContainer.appendChild(info);
 
-      const direccion = document.createElement("p");
-      direccion.textContent = `Dirección: ${obj.direccio}`;
-      item.appendChild(direccion);
+        // Añadir bandera si existe
+        if (obj.bandera) {
+            const bandera = document.createElement("img");
+            bandera.src = obj.bandera;
+            bandera.alt = `Bandera de ${obj.pais}`;
+            bandera.style.width = "30px";
+            bandera.style.height = "20px";
+            bandera.style.border = "1px solid #ccc";
+            paisCiutatContainer.appendChild(bandera);
+        }
 
-   
-      if (obj.tipus === "Atraccio" || obj.tipus === "Museu") {
-          if (obj.horaris) {
-              const horario = document.createElement("p");
-              horario.textContent = `Horario: ${obj.horaris}`;
-              item.appendChild(horario);
-          }
+        item.appendChild(paisCiutatContainer);
 
-          const precio = document.createElement("p");
-          precio.textContent = `Precio: ${obj.preu} ${obj.moneda}`;
-          item.appendChild(precio);
-      }
+        const direccion = document.createElement("p");
+        direccion.textContent = `Dirección: ${obj.direccio}`;
+        item.appendChild(direccion);
 
+        if (obj.tipus === "Atraccio" || obj.tipus === "Museu") {
+            if (obj.horari || obj.horaris) {
+                const horario = document.createElement("p");
+                horario.textContent = `Horario: ${obj.horari || obj.horaris}`;
+                item.appendChild(horario);
+            }
 
-      if (obj.latitud && obj.longitud) {
-          const botonMapa = document.createElement("button");
-          botonMapa.textContent = "Mostrar en mapa";
-          botonMapa.className = "boton-mapa";
-          botonMapa.onclick = function() {
-              mostrarEnMapa(obj);
-          };
-          item.appendChild(botonMapa);
-      }
+            const precio = document.createElement("p");
+            precio.textContent = `Precio: ${obj.preu} ${obj.moneda}`;
+            item.appendChild(precio);
+        }
 
-      lista.appendChild(item);
-  });
+        if (obj.latitud && obj.longitud) {
+            const botonMapa = document.createElement("button");
+            botonMapa.textContent = "Mostrar en mapa";
+            botonMapa.className = "boton-mapa";
+            botonMapa.onclick = function() {
+                mostrarEnMapa(obj);
+            };
+            item.appendChild(botonMapa);
+        }
 
-  resultsDiv.appendChild(lista);
+        lista.appendChild(item);
+    });
 
-  // Actualizar el mapa con todos los elementos filtrados
-  actualizarTodosMapa(resultats);
+    resultsDiv.appendChild(lista);
+
+    actualizarTodosMapa(resultats);
 }
-
 
 
 
@@ -342,11 +401,9 @@ function netejarTot() {
 
 function actualizarTodosMapa(resultats) {
     // Esta función actualiza el mapa con todos los resultados filtrados
-
     
     if (!mapa || resultats.length === 0) return;
     
-
     resultats.forEach(obj => {
         if (obj.latitud && obj.longitud) {
          
@@ -359,6 +416,7 @@ function actualizarTodosMapa(resultats) {
         mapa.actulizarPosInitMapa(primerConCoordenadas.latitud, primerConCoordenadas.longitud);
     }
 }
+
 
 function mostrarEnMapa(obj) {
 
