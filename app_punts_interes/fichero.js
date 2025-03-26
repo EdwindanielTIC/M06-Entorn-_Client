@@ -16,47 +16,44 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 //arrastramos el archivio para que se lea
+
+
 function dropHandler(ev) {
-  console.log("Fichero(s) arrastrados");
-  ev.preventDefault();
+    console.log("Fichero(s) arrastrados");
+    ev.preventDefault();
 
-  const contenedor = document.querySelector(".container");
-  if (!contenedor) {
-      console.error("No se encontró el contenedor");
-      return;
-  }
+    const contenedor = document.querySelector(".container");
+    if (!contenedor) {
+        console.error("No se encontró el contenedor");
+        return;
+    }
 
-  if (ev.dataTransfer.items) {
-      for (let i = 0; i < ev.dataTransfer.items.length; i++) {
-          if (ev.dataTransfer.items[i].kind === "file") {
-              const file = ev.dataTransfer.items[i].getAsFile();
-              const fileName = file.name.toLowerCase();
-              const fileExt = fileName.split(".").pop();
+    if (ev.dataTransfer.items) {
+        for (let i = 0; i < ev.dataTransfer.items.length; i++) {
+            if (ev.dataTransfer.items[i].kind === "file") {
+                const file = ev.dataTransfer.items[i].getAsFile();
+                const fileName = file.name.toLowerCase();
+                const fileExt = fileName.split(".").pop();
 
-              if (fileExt !== "csv") {
-                  muestroImagen(contenedor);
-              } else {
-                  console.log("-----Archivo CSV aceptado-----", fileName);
-                  handleFileSelection({ target: { files: [file] } });
-              }
-          }
-      }
-  }
+                if (fileExt !== "csv") {
+                    muestroImagen(contenedor);
+                } else {
+                    console.log("-----Archivo CSV aceptado-----", fileName);
+                    handleFileSelection({ target: { files: [file] } });
+                }
+            }
+        }
+    }
 
-  removeDragData(ev);
+    removeDragData(ev);
 }
 
-
 // con la siguiente funcion, voy a subir un archivo csv, me lo va a procesar y me dara info del lugar
-
-
 function handleFileSelection(event) {
-
-  
+    const file = event.target.files[0];
     const fileContentDisplay = document.getElementById("file-content");
     const messageDisplay = document.getElementById("message");
 
-    const file = event.target.files[0];
     fileContentDisplay.textContent = "";
     messageDisplay.textContent = "";
 
@@ -65,9 +62,8 @@ function handleFileSelection(event) {
         return;
     }
 
-    //siguiente codigo me va a leer el archivo con filereader, me extraera su contenido, divide el cont el linea y lo procesa
-
     const reader = new FileReader();
+    
     reader.onload = async () => {
         const contenido = reader.result;
         fileContentDisplay.textContent = contenido;
@@ -75,6 +71,8 @@ function handleFileSelection(event) {
         const lineas = contenido.split("\n").map(line => line.trim());
         llistaObjectes = [];
         tipusSet.clear();
+
+        const promesas = []; // Para manejar todas las peticiones a la API
 
         for (let i = 1; i < lineas.length; i++) {
             if (lineas[i] === "") continue;
@@ -89,6 +87,7 @@ function handleFileSelection(event) {
             const ciutat = columnas[3]?.trim() || "";
             const nom = columnas[4]?.trim() || "";
             const direccio = columnas[5]?.trim() || "";
+            
             let latitud = columnas[6] ? parseFloat(columnas[6].trim()) : null;
             let longitud = columnas[7] ? parseFloat(columnas[7].trim()) : null;
 
@@ -96,32 +95,34 @@ function handleFileSelection(event) {
                 objecto = new PuntInteres(id, pais, ciutat, nom, direccio);
                 objecto.tipus = "Espai";
             } else if (tipus === "Atraccio") {
-                const horari = columnas[6]?.trim() || "";
-                const preu = parseFloat(columnas[7]?.trim() || "0");
-                const moneda = columnas[8]?.trim() || "EUR";
+                const horari = columnas[8]?.trim() || "";
+                const preu = parseFloat(columnas[9]?.trim() || "0");
+                const moneda = columnas[10]?.trim() || "EUR";
                 objecto = new Atraccio(id, pais, ciutat, nom, direccio, horari, preu, moneda);
                 objecto.tipus = "Atraccio";
-                latitud = columnas[9] ? parseFloat(columnas[9].trim()) : null;
-                longitud = columnas[10] ? parseFloat(columnas[10].trim()) : null;
             } else if (tipus === "Museu") {
-                const horaris = columnas[6]?.trim() || "";
-                const preu = parseFloat(columnas[7]?.trim() || "0");
-                const moneda = columnas[8]?.trim() || "EUR";
+                const horaris = columnas[8]?.trim() || "";
+                const preu = parseFloat(columnas[9]?.trim() || "0");
+                const moneda = columnas[10]?.trim() || "EUR";
                 objecto = new Museu(id, pais, ciutat, nom, direccio, horaris, preu, moneda);
                 objecto.tipus = "Museu";
-                latitud = columnas[9] ? parseFloat(columnas[9].trim()) : null;
-                longitud = columnas[10] ? parseFloat(columnas[10].trim()) : null;
             }
 
             if (objecto) {
+                if (latitud && longitud) {
+                    objecto.latitud = latitud;
+                    objecto.longitud = longitud;
+                }
+
                 llistaObjectes.push(objecto);
                 
-                if (!latitud || !longitud) { 
-                    // console.log(`Coordenadas faltantes para ${objecto.nom} (${objecto.tipus})`);    
-                    await obtenerDatosPais(pais, objecto);
-                }
+                // Siempre obtener la bandera, incluso si hay coordenadas
+                promesas.push(obtenerDatosPais(pais, objecto));
             }
         }
+
+        // Esperar a que todas las banderas se carguen
+        await Promise.all(promesas);
 
         console.log("Llista d'objectes creada:", llistaObjectes);
         console.log("Tipus disponibles:", tipusSet);
@@ -141,21 +142,33 @@ function handleFileSelection(event) {
 
 async function obtenerDatosPais(code, objecto) {
     try {
+        if (!code) {
+            console.warn("Código de país vacío para objeto:", objecto);
+            return;
+        }
+
         const response = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
+        if (!response.ok) {
+            console.warn(`Error al obtener datos para ${code}. Status: ${response.status}`);
+            return;
+        }
+
         const data = await response.json();
-
-        // console.log("Respuesta de la API:", data);
-
-        if (!data || data.status === 404) {
-            console.warn(`Código de país no encontrado: ${code}`);
+        if (!data || data.status === 404 || !data[0]) {
+            console.warn(`No se encontraron datos para el código: ${code}`);
             return;
         }
 
         const country = data[0];
-        objecto.bandera = country.flags.svg;
-        objecto.latitud = country.latlng[0];
-        objecto.longitud = country.latlng[1];
+        if (country.flags?.svg) {
+            objecto.bandera = country.flags.svg;
+        }
 
+        // Solo asignar coordenadas si no existen
+        if (!objecto.latitud && !objecto.longitud && country.latlng?.length >= 2) {
+            objecto.latitud = country.latlng[0];
+            objecto.longitud = country.latlng[1];
+        }
     } catch (error) {
         console.error("Error al obtener datos del país:", error);
     }
@@ -206,25 +219,14 @@ function removeDragData(ev) {
     }
 }
 
-//funcion para mostrar imagen de csv no leido
 function muestroImagen(contenedor) {
-
  
   const fotoContenedor = document.getElementById("foto");
+
 if (!fotoContenedor) {
     console.error("Elemento con ID 'foto' no encontrado");
     return;
 }
-
-  if ( fotoContenedor && imatge instanceof Node) {
-    fotoContenedor.appendChild(imatge);
-    //   console.log("No se ha encontrado ninguna foto");
-    //   return;
-  }
-  if (resultsDiv && lista instanceof Node) {
-    resultsDiv.appendChild(lista);
-}
-
 
   if (!fotoContenedor.querySelector("img")) {
       const imatge = document.createElement("img");
@@ -243,58 +245,50 @@ if (!fotoContenedor) {
 
 
 
-
 // Funciones para la funcionalidad de filtrado y visualización
 function aplicarFiltros() {
-  const tipusSeleccionat = document.getElementById("tipus").value;
-  const ordenacio = document.getElementById("ordenacio").value;
-  const textFiltre = document.querySelector("input[type='text']").value.toLowerCase();
+    try {
+        const tipusSeleccionat = document.getElementById("tipus")?.value || "";
+        const ordenacio = document.getElementById("ordenacio")?.value || "asc";
+        const textFiltre = document.querySelector("input[type='text']")?.value.toLowerCase() || "";
 
-   let resultats = llistaObjectes;
+        if (!llistaObjectes) {
+            console.error("llistaObjectes no está definida");
+            return;
+        }
 
-   resultats = resultats.filter(obj => {
-      if (!obj) return false; 
+        let resultats = llistaObjectes.filter(obj => {
+            if (!obj || !obj.nom) {
+                console.warn("Objeto inválido encontrado:", obj);
+                return false;
+            }
 
-     
-      if (tipusSeleccionat && obj.tipus !== tipusSeleccionat) {
-          return false;
-      }
-      
-      if (textFiltre && !obj.nom.toLowerCase().includes(textFiltre)) {
-          return false;
-      }
+            if (tipusSeleccionat && obj.tipus !== tipusSeleccionat) return false;
+            if (textFiltre && !obj.nom.toLowerCase().includes(textFiltre)) return false;
+            return true;
+        });
 
-      return true;
-  });
+        resultats.sort((a, b) => {
+            const nomA = a.nom.toLowerCase();
+            const nomB = b.nom.toLowerCase();
+            return ordenacio === "asc" ? nomA.localeCompare(nomB) : nomB.localeCompare(nomA);
+        });
 
-  
-  resultats.sort((a, b) => {
-      const nomA = a.nom.toLowerCase();
-      const nomB = b.nom.toLowerCase();
-    //   console.log(`el total de lugares es : ${llistaObjectes.length}`)
+        mostrarResultats(resultats);
 
-      if (ordenacio === "asc") {
-          return nomA.localeCompare(nomB);
-      } else {
-          return nomB.localeCompare(nomA);
-      }
-  });
+        console.log("Total de objetos en llistaObjectes:", llistaObjectes.length);
+        console.log("Objetos filtrados:", resultats.length);
+        console.log("Contenido de llistaObjectes:", llistaObjectes);
 
-
-  // Mostrar resultados
-  mostrarResultats(resultats);
-
-
-  // Actualizar contador
-
-  if(!tipusSeleccionat && !textFiltre){
-    document.getElementById("numeroTotal").textContent = `Numero total: ${llistaObjectes.length}`;
-
-  }else{
-    document.getElementById("numeroTotal").textContent = `Numero total: ${resultats.length}`;
-
-  }
-
+        const numeroTotalElement = document.getElementById("numeroTotal");
+        if (numeroTotalElement) {
+            numeroTotalElement.textContent = `Número total: ${resultats.length}`;
+        } else {
+            console.error("Elemento 'numeroTotal' no encontrado en el DOM");
+        }
+    } catch (error) {
+        console.error("Error en aplicarFiltros:", error);
+    }
 }
 
 
@@ -304,6 +298,8 @@ function aplicarFiltros() {
 
 function mostrarResultats(resultats) {
     const resultsDiv = document.querySelector(".results");
+
+    
 
     if (resultats.length === 0) {
         resultsDiv.textContent = "No hi ha informació per mostrar";
@@ -424,3 +420,7 @@ function mostrarEnMapa(obj) {
     
     mapa.actulizarPosInitMapa(obj.latitud, obj.longitud);
 }
+
+
+
+

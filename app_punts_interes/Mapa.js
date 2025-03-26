@@ -80,16 +80,15 @@ class Mapa{
         .openPopup();
 
     }
-  
+  // puto importante
 
-    mostrarPunt(lat,lon, desc=" "){
-
+    mostrarPunt(lat, lon, desc = "Sin descripción") {
+        if (typeof desc !== 'string') {
+            desc = "Sin descripción"; // Fallback si desc no es una cadena
+        }
         L.marker([lat, lon]).addTo(this.#map)
-        .bindPopup(desc = lat , lon)
-        .openPopup();
-
-
-
+            .bindPopup(desc) // Solo pasamos desc como cadena
+            .openPopup();
     }
     
 }
