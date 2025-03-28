@@ -1,7 +1,6 @@
 let llistaObjectes = [];
-let tipusSet = new Set(); // Set para almacenar tipos únicos
+let tipusSet = new Set();
 let mapa;
-
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -77,7 +76,11 @@ function handleFileSelection(event) {
         for (let i = 1; i < lineas.length; i++) {
             if (lineas[i] === "") continue;
 
+            
+
             const columnas = lineas[i].split(",");
+            console.log("Columnas procesadas:", columnas);
+            
             const tipus = columnas[0]?.trim();
             if (tipus) tipusSet.add(tipus);
 
@@ -87,9 +90,12 @@ function handleFileSelection(event) {
             const ciutat = columnas[3]?.trim() || "";
             const nom = columnas[4]?.trim() || "";
             const direccio = columnas[5]?.trim() || "";
+           
             
-            let latitud = columnas[6] ? parseFloat(columnas[6].trim()) : null;
-            let longitud = columnas[7] ? parseFloat(columnas[7].trim()) : null;
+            
+            let latitud = columnas[6] ? parseFloat(columnas[6].trim().replace(/[^0-9.-]/g, '')) : null; //limpio los datos antes de pasarlo
+            let longitud = columnas[7] ? parseFloat(columnas[7].trim().replace(/[^0-9.-]/g, '')) : null;
+            const descripcio = columnas[11]?.trim() || "";
 
             if (tipus === "Espai") {
                 objecto = new PuntInteres(id, pais, ciutat, nom, direccio);
@@ -104,7 +110,8 @@ function handleFileSelection(event) {
                 const horaris = columnas[8]?.trim() || "";
                 const preu = parseFloat(columnas[9]?.trim() || "0");
                 const moneda = columnas[10]?.trim() || "EUR";
-                objecto = new Museu(id, pais, ciutat, nom, direccio, horaris, preu, moneda);
+                const descripcio = columnas[11]?.trim() || "";
+                objecto = new Museu(id, pais, ciutat, nom, direccio, horaris, preu, moneda, descripcio);
                 objecto.tipus = "Museu";
             }
 
@@ -299,8 +306,6 @@ function aplicarFiltros() {
 function mostrarResultats(resultats) {
     const resultsDiv = document.querySelector(".results");
 
-    
-
     if (resultats.length === 0) {
         resultsDiv.textContent = "No hi ha informació per mostrar";
         return;
@@ -311,27 +316,33 @@ function mostrarResultats(resultats) {
     const lista = document.createElement("ul");
     lista.className = "lista-resultados";
 
-    resultats.forEach(obj => {
-        if (!obj || !obj.nom || !obj.ciutat || !obj.pais) return;
 
+
+    //Cada vez qu recorre resultados me crea un li para mostrarme la informacion de una ubicacion
+    //guardare el li en una variable llamada item , que sera agregada a la lista lu
+   
+    //para que me funcione el liminar ubicacion y que se reste el contador, debo de pasar
+    //el index como segundo parametro en el foreach poque si no , no se me actuluza
+
+    resultats.forEach((obj, index) => {
+        if (!obj || !obj.nom || !obj.ciutat || !obj.pais) return; // Solo requerir nombre, ciudad y país
+    
         const item = document.createElement("li");
         item.className = `item-${obj.tipus.toLowerCase()}`;
-
+    
         const titulo = document.createElement("h3");
         titulo.textContent = obj.nom;
         item.appendChild(titulo);
-
-        // Contenedor para país, ciudad y bandera
+    
         const paisCiutatContainer = document.createElement("div");
         paisCiutatContainer.style.display = "flex";
         paisCiutatContainer.style.alignItems = "center";
         paisCiutatContainer.style.gap = "10px";
-
+    
         const info = document.createElement("p");
         info.textContent = `${obj.ciutat}, ${obj.pais}`;
         paisCiutatContainer.appendChild(info);
-
-        // Añadir bandera si existe
+    
         if (obj.bandera) {
             const bandera = document.createElement("img");
             bandera.src = obj.bandera;
@@ -341,25 +352,31 @@ function mostrarResultats(resultats) {
             bandera.style.border = "1px solid #ccc";
             paisCiutatContainer.appendChild(bandera);
         }
-
+    
         item.appendChild(paisCiutatContainer);
-
+    
         const direccion = document.createElement("p");
         direccion.textContent = `Dirección: ${obj.direccio}`;
         item.appendChild(direccion);
-
+    
         if (obj.tipus === "Atraccio" || obj.tipus === "Museu") {
             if (obj.horari || obj.horaris) {
                 const horario = document.createElement("p");
                 horario.textContent = `Horario: ${obj.horari || obj.horaris}`;
                 item.appendChild(horario);
             }
-
+    
             const precio = document.createElement("p");
             precio.textContent = `Precio: ${obj.preu} ${obj.moneda}`;
             item.appendChild(precio);
+    
+            if (obj.descripcio) { // Corregir: usar obj.descripcio directamente
+                const descripcio = document.createElement("p");
+                descripcio.textContent = `Descripción: ${obj.descripcio}`;
+                item.appendChild(descripcio);
+            }
         }
-
+    
         if (obj.latitud && obj.longitud) {
             const botonMapa = document.createElement("button");
             botonMapa.textContent = "Mostrar en mapa";
@@ -369,14 +386,30 @@ function mostrarResultats(resultats) {
             };
             item.appendChild(botonMapa);
         }
-
+    
+        const botonParaEliminar = document.createElement("button");
+        botonParaEliminar.textContent = "Eliminar";
+        botonParaEliminar.style.backgroundColor = "red";
+        botonParaEliminar.style.color = "white";
+    
+        botonParaEliminar.onclick = function() {
+            resultats.splice(index, 1);
+            lista.removeChild(item);
+            const numeroTotalElement = document.getElementById("numeroTotal");
+            if (numeroTotalElement) {
+                numeroTotalElement.textContent = `Número total: ${resultats.length}`;
+            }
+            actualizarTodosMapa(resultats);
+        };
+    
+        item.appendChild(botonParaEliminar);
         lista.appendChild(item);
     });
 
     resultsDiv.appendChild(lista);
-
     actualizarTodosMapa(resultats);
 }
+
 
 
 
@@ -409,18 +442,39 @@ function actualizarTodosMapa(resultats) {
     });
     const primerConCoordenadas = resultats.find(obj => obj.latitud && obj.longitud);
     if (primerConCoordenadas) {
-        mapa.actulizarPosInitMapa(primerConCoordenadas.latitud, primerConCoordenadas.longitud);
+        mapa.actualizarPosInitMapa(primerConCoordenadas.latitud, primerConCoordenadas.longitud);
     }
 }
 
 
 function mostrarEnMapa(obj) {
-
-    if (!mapa || !obj.latitud || !obj.longitud) return;
+    console.log("Mostrando en mapa:", obj);
+    if (!mapa) {
+        console.error("Mapa no está definido");
+        return;
+    }
+    if (!obj.latitud || !obj.longitud || isNaN(obj.latitud) || isNaN(obj.longitud)) {
+        console.warn("Coordenadas no válidas:", obj.latitud, obj.longitud);
+        return;
+    }
     
-    mapa.actulizarPosInitMapa(obj.latitud, obj.longitud);
+    mapa.actualizarPosInitMapa(obj.latitud, obj.longitud);
+    console.log("Mapa actualizado a:", obj.latitud, obj.longitud);
 }
 
 
-
+function actualizarTodosMapa(resultats) {
+    if (!mapa || resultats.length === 0) return;
+    
+    resultats.forEach(obj => {
+        if (obj.latitud && obj.longitud) {
+            const descripcion = `${obj.nom} (${obj.tipus})`;
+            mapa.mostrarPunt(obj.latitud, obj.longitud, descripcion);
+        }
+    });
+    const primerConCoordenadas = resultats.find(obj => obj.latitud && obj.longitud);
+    if (primerConCoordenadas) {
+        mapa.actualizarPosInitMapa(primerConCoordenadas.latitud, primerConCoordenadas.longitud);
+    }
+}
 

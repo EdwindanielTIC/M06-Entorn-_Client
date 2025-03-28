@@ -5,11 +5,12 @@ class Museu extends PuntInteres{
     moneda;
     descripcio;
 
-    constructor(id,pais,ciutat,nom,direccio,horaris,preu,moneda){
+    constructor(id,pais,ciutat,nom,direccio,horaris,preu,moneda,descripcio){
         super(id,pais,ciutat,nom,direccio);
         this.horaris=horaris;
         this.preu= preu;
         this.moneda = moneda;
+        this.descripcio = descripcio;
         
     }
 

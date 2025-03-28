@@ -1,7 +1,6 @@
 class Mapa{
     #map;
     
-
     //pintara el mapa
     constructor(){
 
@@ -9,7 +8,7 @@ class Mapa{
         this.#map = L.map('map', { center: [51.505, -0.09], zoom: 13 });
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(this.#map);
 
         
@@ -24,6 +23,7 @@ class Mapa{
             fillColor: '#f03',
             fillOpacity: 0.5,
             radius: 500
+
         }).addTo(this.#map);
 
         var polygon = L.polygon([
@@ -47,57 +47,46 @@ class Mapa{
     };
     
 
-    mostrarPuntInicial(pos){
-
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            this.#map.setView([lat,lon], 15);
-            
-
-            L.marker([lat, lon]).addTo(this.#map)
-            .bindPopup('Ubicacion actual')
-            .openPopup();
-
-            console.log(`latitud ${lat}` );
-            console.log(`longitud ${lon}` );
-            
-          
-    } 
-
-
-
-    actulizarPosInitMapa(lat, lon){
-
-        if(!this.#map){
-            console.error("Error: el mapa no esta funcionando")
-            return;
-        }
-        
-        this.#map.setView([lat,lon], 15) // me movera a la nueva posicion
+    mostrarPuntInicial(pos) {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        this.#map.setView([lat, lon], 15);
 
         L.marker([lat, lon]).addTo(this.#map)
-        .bindPopup('Nueva posición inicial')
-        .openPopup();
+            .bindPopup('Ubicación actual')
+            .openPopup();
 
+        console.log(`latitud ${lat}`);
+        console.log(`longitud ${lon}`);
     }
-  // puto importante
+
+    limpiarMapa() {
+        this.#map.eachLayer(layer => {
+            if (layer instanceof L.Marker || layer instanceof L.Circle || layer instanceof L.Polygon) {
+                this.#map.removeLayer(layer);
+            }
+        });
+    }
+
+    actualizarPosInitMapa(lat, lon) {
+        if (!this.#map) {
+            console.error("Error: el mapa no está funcionando");
+            return;
+        }
+        this.limpiarMapa(); // Limpiar marcadores previos
+        this.#map.setView([lat, lon], 15);
+        L.marker([lat, lon]).addTo(this.#map)
+            .bindPopup('Nueva posición inicial')
+            .openPopup();
+    }
 
     mostrarPunt(lat, lon, desc = "Sin descripción") {
         if (typeof desc !== 'string') {
-            desc = "Sin descripción"; // Fallback si desc no es una cadena
+            desc = "Sin descripción";
         }
         L.marker([lat, lon]).addTo(this.#map)
-            .bindPopup(desc) // Solo pasamos desc como cadena
+            .bindPopup(desc)
             .openPopup();
     }
-    
 }
-
-
-
-
-
-
-
-
 
