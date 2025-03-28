@@ -38,6 +38,16 @@ getEsmanual(){
 
 }
 
+getNom(){
+    
+    return this.nom;
+}
+
+getDireccio(){
+    
+    return this.direccio;
+}
+
 setEsmanual(){
 
 }

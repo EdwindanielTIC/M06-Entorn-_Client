@@ -1,5 +1,10 @@
+
+
 class Mapa{
     #map;
+   
+
+
     
     //pintara el mapa
     constructor(){
@@ -68,24 +73,22 @@ class Mapa{
         });
     }
 
-    actualizarPosInitMapa(lat, lon) {
+    actualizarPosInitMapa(lat, lon, nom , direccio ) {
         if (!this.#map) {
             console.error("Error: el mapa no está funcionando");
             return;
         }
         this.limpiarMapa(); // Limpiar marcadores previos
         this.#map.setView([lat, lon], 15);
+
         L.marker([lat, lon]).addTo(this.#map)
-            .bindPopup('Nueva posición inicial')
+            .bindPopup(` ${nom}<br>${direccio}`)
             .openPopup();
     }
 
-    mostrarPunt(lat, lon, desc = "Sin descripción") {
-        if (typeof desc !== 'string') {
-            desc = "Sin descripción";
-        }
+    mostrarPunt(lat, lon, nom  , direccio ) {
         L.marker([lat, lon]).addTo(this.#map)
-            .bindPopup(desc)
+            .bindPopup(`<b>${nom}</b><br>${direccio}`)
             .openPopup();
     }
 }

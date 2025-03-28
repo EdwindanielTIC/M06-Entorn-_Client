@@ -183,11 +183,6 @@ async function obtenerDatosPais(code, objecto) {
 
 
 
-
-
-
-
-
 // Actualizar menu desplegabel
 
 function updateDropdown() {
@@ -434,10 +429,10 @@ function actualizarTodosMapa(resultats) {
     if (!mapa || resultats.length === 0) return;
     
     resultats.forEach(obj => {
-        if (obj.latitud && obj.longitud) {
+        if (obj.latitud && obj.longitud && obj.nom && obj.direccio) {
          
             const descripcion = `${obj.nom} (${obj.tipus})`;
-            mapa.mostrarPunt(obj.latitud, obj.longitud, descripcion);
+            mapa.mostrarPunt(obj.latitud, obj.longitud, descripcion , obj.direccio , obj.nom);
         }
     });
     const primerConCoordenadas = resultats.find(obj => obj.latitud && obj.longitud);
@@ -467,14 +462,14 @@ function actualizarTodosMapa(resultats) {
     if (!mapa || resultats.length === 0) return;
     
     resultats.forEach(obj => {
-        if (obj.latitud && obj.longitud) {
-            const descripcion = `${obj.nom} (${obj.tipus})`;
-            mapa.mostrarPunt(obj.latitud, obj.longitud, descripcion);
+        if (obj.latitud && obj.longitud && obj.nom && obj.direccio) {
+            
+            mapa.mostrarPunt(obj.latitud, obj.longitud,  obj.direccio , obj.nom);
         }
     });
-    const primerConCoordenadas = resultats.find(obj => obj.latitud && obj.longitud);
+    const primerConCoordenadas = resultats.find(obj => obj.latitud && obj.longitud && obj.nom && obj.direccio);
     if (primerConCoordenadas) {
-        mapa.actualizarPosInitMapa(primerConCoordenadas.latitud, primerConCoordenadas.longitud);
+        mapa.actualizarPosInitMapa(primerConCoordenadas.latitud, primerConCoordenadas.longitud , primerConCoordenadas.nom, primerConCoordenadas.direccio);
     }
 }
 
