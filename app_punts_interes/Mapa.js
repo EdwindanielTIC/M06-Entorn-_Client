@@ -86,9 +86,10 @@ class Mapa{
             .openPopup();
     }
 
-    mostrarPunt(lat, lon, nom  , direccio ) {
+    //me cuenta el total de los puntos de interes
+    mostrarPunt(lat, lon , nom, direccio ) {
         L.marker([lat, lon]).addTo(this.#map)
-            .bindPopup(`<b>${nom}</b><br>${direccio}`)
+            .bindPopup(` ubicacion actual <b>${nom}</b><br>${direccio}`)
             .openPopup();
     }
 }

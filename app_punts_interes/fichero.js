@@ -453,7 +453,7 @@ function mostrarEnMapa(obj) {
         return;
     }
     
-    mapa.actualizarPosInitMapa(obj.latitud, obj.longitud);
+    mapa.actualizarPosInitMapa(obj.latitud, obj.longitud, obj.nom, obj.direccio); // Actualizar posición inicial y me da el nombre y la direccion
     console.log("Mapa actualizado a:", obj.latitud, obj.longitud);
 }
 
