@@ -2,6 +2,7 @@ let llistaObjectes = [];
 let tipusSet = new Set();
 let mapa;
 
+// este evento me asegurara que todo el codigo que estara dentro de el solo se ejcutara cuando el contenido del dom este cargado
 document.addEventListener('DOMContentLoaded', () => {
 
     mapa = new Mapa(); 
@@ -17,26 +18,27 @@ document.addEventListener('DOMContentLoaded', () => {
 //arrastramos el archivio para que se lea
 
 
-function dropHandler(ev) {
+//con la funcionar dropHandler se ejecutara cuando el usuario arraste el arrchivo csv
+function dropHandler(ev) { //ev = evento que ocurre cuando el usuario suelta el archivo
     console.log("Fichero(s) arrastrados");
     ev.preventDefault();
 
-    const contenedor = document.querySelector(".container");
+    const contenedor = document.querySelector(".container"); 
     if (!contenedor) {
         console.error("No se encontró el contenedor");
         return;
     }
 
-    if (ev.dataTransfer.items) {
+    if (ev.dataTransfer.items) {  // ev.dataTransfer.items -_> contendra informacion de los elementos arrastrados
         for (let i = 0; i < ev.dataTransfer.items.length; i++) {
-            if (ev.dataTransfer.items[i].kind === "file") {
-                const file = ev.dataTransfer.items[i].getAsFile();
+            if (ev.dataTransfer.items[i].kind === "file") { //mediante kind verifico si el archivo es csv
+                const file = ev.dataTransfer.items[i].getAsFile(); 
                 const fileName = file.name.toLowerCase();
                 const fileExt = fileName.split(".").pop();
 
-                if (fileExt !== "csv") {
+                if (fileExt !== "csv") { //si el archivo no es csv no es imagen me mostrara una imagen
                     muestroImagen(contenedor);
-                } else {
+                } else { // si es archivo, imprimo por consola que se ha aceptado
                     console.log("-----Archivo CSV aceptado-----", fileName);
                     handleFileSelection({ target: { files: [file] } });
                 }
@@ -44,14 +46,17 @@ function dropHandler(ev) {
         }
     }
 
-    removeDragData(ev);
+    removeDragData(ev); // eliminara cualquier otro dato asociado al evento de arrastar y soltar
 }
+
+
+
 
 // con la siguiente funcion, voy a subir un archivo csv, me lo va a procesar y me dara info del lugar
 function handleFileSelection(event) {
-    const file = event.target.files[0];
-    const fileContentDisplay = document.getElementById("file-content");
-    const messageDisplay = document.getElementById("message");
+    const file = event.target.files[0]; //accedo al archivo desde un input de tipo file
+    const fileContentDisplay = document.getElementById("file-content"); //id de donde se arrastra el archido
+    const messageDisplay = document.getElementById("message");// id de donde voy a mostrarlo
 
     fileContentDisplay.textContent = "";
     messageDisplay.textContent = "";
@@ -62,24 +67,26 @@ function handleFileSelection(event) {
     }
 
     const reader = new FileReader();
+ 
     
     reader.onload = async () => {
-        const contenido = reader.result;
+        const contenido = reader.result; // se utiliza para leer el contenido del archivo
         fileContentDisplay.textContent = contenido;
 
+        //dividire el archivo en lineas , que utilizare como separador
         const lineas = contenido.split("\n").map(line => line.trim());
-        llistaObjectes = [];
+        llistaObjectes = [];// guardare aqui todo los objetos procesados
         tipusSet.clear();
 
         const promesas = []; // Para manejar todas las peticiones a la API
 
-        for (let i = 1; i < lineas.length; i++) {
+        for (let i = 1; i < lineas.length; i++) { // con el i = 1 me aseguro de no procesar el enbabezado
             if (lineas[i] === "") continue;
 
             
 
             const columnas = lineas[i].split(",");
-            console.log("Columnas procesadas:", columnas);
+            // console.log("Columnas procesadas:", columnas);
             
             const tipus = columnas[0]?.trim();
             if (tipus) tipusSet.add(tipus);
@@ -144,6 +151,8 @@ function handleFileSelection(event) {
 
     reader.readAsText(file);
 }
+
+
 
 //hacemos una peticion a la api para obtener los datos del pais y asi obtenter la banderas
 
