@@ -88,6 +88,7 @@ function handleFileSelection(event) {
             const columnas = lineas[i].split(",");
             // console.log("Columnas procesadas:", columnas);
             
+            //a continuacion voy a crear para cada linea el valor de la columna que sera espai,atraccio y museum
             const tipus = columnas[0]?.trim();
             if (tipus) tipusSet.add(tipus);
 
@@ -103,6 +104,8 @@ function handleFileSelection(event) {
             let latitud = columnas[6] ? parseFloat(columnas[6].trim().replace(/[^0-9.-]/g, '')) : null; //limpio los datos antes de pasarlo
             let longitud = columnas[7] ? parseFloat(columnas[7].trim().replace(/[^0-9.-]/g, '')) : null;
             const descripcio = columnas[11]?.trim() || "";
+
+            //dependiendo de cada objeto se creara el objeto
 
             if (tipus === "Espai") {
                 objecto = new PuntInteres(id, pais, ciutat, nom, direccio);
@@ -122,13 +125,14 @@ function handleFileSelection(event) {
                 objecto.tipus = "Museu";
             }
 
+            // si el objeto es valido tiene cordenara se asigna las cordenadas
             if (objecto) {
                 if (latitud && longitud) {
                     objecto.latitud = latitud;
                     objecto.longitud = longitud;
                 }
 
-                llistaObjectes.push(objecto);
+                llistaObjectes.push(objecto); //realizado un pericion a la API para tner infmaicon adicional
                 
                 // Siempre obtener la bandera, incluso si hay coordenadas
                 promesas.push(obtenerDatosPais(pais, objecto));
